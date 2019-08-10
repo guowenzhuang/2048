@@ -1,5 +1,4 @@
 <h3 align="center">2048</h3>
-> guowenzhaung
 
 <p align="center"> 
     经典2048游戏
