@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>2048</title>
+    <script type="text/javascript" src="js/vue.js"></script>
+    <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/animate.css">
+    <style>
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+	#ysd-tzfe-all{
+	 width: 100%;
+        height: 100%;
+         display: flex;
+        justify-content: center;
+        align-items: center;
+}
+    .ysd-tzfe-newGame {
+        background-color: #887A6D;
+        border: none;
+        outline: none;
+        width: 100px;
+        padding: 15px 0px 15px 0;
+        cursor: pointer;
+        color: #FFF;
+        border-radius: 15px;
+       /*  margin-left: 35%; */
+    }
+
+    h3 {
+       /*  margin-left: 40%; */
+    }
+
+    .ysd-tzfe-block {
+        width: 300px;
+        background-color: #BBADA0;
+        overflow: auto;
+        padding-right: 10px;
+        padding-bottom: 10px;
+    }
+
+    .ysd-tzfe-block div {
+        width: 64px;
+        height: 64px;
+        background-color: #CCC0B2;
+        float: left;
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score {
+        font-size: 50px;
+        line-height: 60px;
+        text-align: center;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .tran {
+        transition: all 0.1s linear;
+        -moz-transition: all 0.1s linear;
+        -webkit-transition: all 0.1s linear;
+        -o-transition: all 0.1s linear;
+    }
+
+    .ysd-tzfe-score-0 {
+        background-color: #ccc0b2;
+        color: #ccc0b2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-2 {
+        background-color: #eee4da;
+        color: #776e65;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-4 {
+        background-color: #ede0c8;
+        color: #776e65;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-8 {
+        background-color: #f2b179;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-16 {
+        background-color: #f59563;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-32 {
+        background-color: #f67c5f;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-64 {
+        background-color: #f65e3b;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-128 {
+        font-size: 25px;
+        background-color: #edc850;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-256 {
+        font-size: 25px;
+        background-color: #edc850;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-512 {
+        font-size: 25px;
+        background-color: #edc850;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-1024 {
+        font-size: 20px;
+        background-color: #edc850;
+        color: #f9f6f2;
+    }
+
+    .ysd-tzfe-block .ysd-tzfe-score-2048 {
+        font-size: 20px;
+        background-color: #edc850;
+        color: #f9f6f2;
+    }
+    #ysd-tzfe-all{
+        display: flex;
+        justify-content: center;
+        flex-direction:column;  
+    }
+    </style>
+</head>
+
+<body>
+    <div id="ysd-tzfe-all"
+     v-swipeleft="leftswipe" 
+     v-swiperight="rightswipe"
+     v-swipeup="topswipe"
+     v-swipedown="bottomswipe">
+        <button class="ysd-tzfe-newGame" @click="clicknewGame">New Game</button>
+        <h3 class="animated">score:<span class="ysd-tzfe-scores">{{score}}</span></h3>
+        <transition name="ysd-tzfe">
+            <tzfe-blocks class="ysd-tzfe-block"  ref="allblock">
+                </tzfe-blocks>
+        </transition>
+    </div>
+    <script type="text/javascript">
+
+    	/**
+ * 处理 移动设备上的 点击、长按、左右上下滑动 事件
+ *
+ * =========================================
+ * 导出了7个自定义指令：
+ *  v-tap： tap点击事件
+ *  v-swipe： swipe滑动事件
+ *  v-swipeleft： swipeleft左滑事件
+ *  v-swiperight： swiperight右滑事件
+ *  v-swipedown： swipedown下滑
+ *  v-swipeup： swipeup上滑
+ *  v-longtap： longtap长按
+ * =========================================
+ *
+ * =========================================
+ * 包含四个参数
+ * stop 阻止冒泡
+ * prevent 阻止默认事件
+ * self 只当在 event.target 是当前元素自身时触发处理函数
+ * once 执行一次后解绑
+ *
+ * @example v-tap.stop.prevent.self.once
+ * =========================================
+ *
+ * =========================================
+ * 事件绑定有两种方式
+ * @example
+ *  1. v-tap="showDialog" 绑定一个方法对象
+ *  2. v-tap="{fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}"
+ *      绑定一个JSON字面量，fn是执行的方法，后边的是需要传递的参数
+ * 事件回调参数
+ * @param 第一个参数是event，事件对象
+ * @param 第二个参数是 binding.value，也就是v-tap=""双引号中的部分（如示例2，第二个参数就是 {fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}）
+ * =========================================
+ *
+ * @update
+ *  1. 根据MUI进行了滑动事件的判断修正
+ *  2. 根据TouchEvent修正了点击位置的判断
+ *
+ */
+
+/**
+ * vue上点击事件处理类
+ */
+class VueTouch {
+  /**
+   * @param el
+   * @param binding
+   * @param type
+   */
+  constructor(el, binding, type) {
+    
+    let g = this;
+    
+    g.obj = el;
+    g.binding = binding;
+    g.touchType = type;
+    
+    g.firstTouchPosition = {x: 0, y: 0};
+    g.firstTouchTime = 0;
+    g.callBack = typeof(binding.value) === "object" ? binding.value.fn : binding.value;
+    
+    g.moved = false;
+    g.leaved = false;
+    g.longTouched = false;
+    
+    // 事件监听回调集合
+    let _listener = Object.create(null);
+    
+    // 事件方法
+    let _listen = (type) => {
+      return function (e) {
+        let {stop, prevent, self, once} = g.binding.modifiers;
+        
+        // 配置判断
+        if (stop) e.stopPropagation();
+        if (prevent) e.preventDefault();
+        if (once) g.obj.removeEventListener("touch" + type, _listener[type]);
+        if (self && e.target !== e.currentTarget) return;
+        
+        g[type](e);
+      }
+    };
+    
+    _listener.start = _listen('start');
+    _listener.end = _listen('end');
+    _listener.move = _listen('move');
+    
+    this.obj.addEventListener("touchstart", _listener.start, false);
+    this.obj.addEventListener("touchend", _listener.end, false);
+    this.obj.addEventListener("touchmove", _listener.move, false);
+  }
+  
+  start(e) {
+    
+    let g = this;
+  
+    // 初始化点击状态
+    g.moved = false;
+    g.leaved = false;
+    g.longTouched = false;
+    
+    g.firstTouchPosition = g.getMultiCenter(e.changedTouches);
+    g.firstTouchTime = e.timeStamp;
+    g.time = setTimeout(function () {
+      if (!g.leaved && !g.moved) {
+        g.touchType === "longtap" && g.callBack(e, g.binding.value);
+        g.longTouched = true;
+      }
+    }.bind(g), 1000);
+  }
+  
+  end(e) {
+    
+    let g = this;
+    
+    let {x, y} = g.getMultiCenter(e.changedTouches);
+    let _disX = x - g.firstTouchPosition.x;
+    let _disY = y - g.firstTouchPosition.y;
+    let _dis = Math.sqrt(_disX * _disX + _disY * _disY);
+    let _timeDis = e.timeStamp - g.firstTouchTime;
+    
+    clearTimeout(g.time);
+    
+    let _angle = this.getAngle(_disX, _disY);
+    
+    if (_dis > 18 && _timeDis < 300) {
+      g.touchType === "swipe" && g.callBack(e, g.binding.value);
+      if (_angle >= 60 && _angle <= 120)
+        g.touchType === "swipedown" && g.callBack(e, g.binding.value);
+      if (_angle <= -60 && _angle >= -120)
+        g.touchType === "swipeup" && g.callBack(e, g.binding.value);
+      if (_angle <= 20 && _angle >= -20)
+        g.touchType === "swipeleft" && g.callBack(e, g.binding.value);
+      if ((_angle <= -160 && _angle >-180) || (_angle >= 160 && _angle <= 180))
+        g.touchType === "swiperight" && g.callBack(e, g.binding.value);
+    } else {
+      if (!g.longTouched && !g.moved) {
+        g.touchType === "tap" && g.callBack(e, g.binding.value);
+        g.leaved = true;
+      }
+    }
+  }
+  
+  move() {
+    this.moved = true;
+  }
+  
+  /**
+   * 获取点击集合的中心坐标
+   * @param touches touch对象集合
+   * @return {{x: number, y: number}}
+   */
+  getMultiCenter(touches) {
+    
+    let g = this, x = 0, y = 0;
+    
+    const _length = touches.length;
+    
+    for (let i = 0; i < _length; i++) {
+      x += touches[i].pageX;
+      y += touches[i].pageY;
+    }
+    
+    return {
+      x: Math.round(x / _length),
+      y: Math.round(y / _length)
+    };
+  };
+  
+  getAngle(disX, disY) {
+    let g = this;
+    
+    if (typeof disX !== 'number' || typeof disY !== 'number')
+      return 45;
+    
+    return Math.atan2(disY, disX) * 180 / Math.PI;
+  }
+}
+
+
+Vue.directive("tap", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "tap");
+  }
+});
+Vue.directive("swipe", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "swipe");
+  }
+});
+Vue.directive("swipeleft", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "swipeleft");
+  }
+});
+Vue.directive("swiperight", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "swiperight");
+  }
+});
+Vue.directive("swipedown", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "swipedown");
+  }
+});
+Vue.directive("swipeup", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "swipeup");
+  }
+});
+Vue.directive("longtap", {
+  bind: function (el, binding) {
+    new VueTouch(el, binding, "longtap");
+  }
+});
+
+
+
+    /*二维数组4*4*/
+    let chessData = new Array();
+    for (let i = 0; i < 4; i++) {
+        chessData[i] = new Array();
+        for (let j = 0; j < 4; j++) {
+            chessData[i][j] = 0;
+        }
+    }
+    let f = JSON.parse(window.sessionStorage.getItem('GameDate'));
+    if (f != null) {
+        chessData = f;
+    }
+    /*组件:产生分值的方块
+       score : 分值
+           n : 代表第几块方块
+     isMerge : 是否已经合并过
+    */
+    Vue.component('tzfe-scroke', {
+        template: `<div :class="['ysd-tzfe-score-'+score,'ysd-tzfe-score']">
+           {{score}}
+        </div>`,
+        data() {
+            return {
+                isMerge: false
+            }
+        },
+        props: {
+            score: {
+                type: Number
+            },
+            n: {
+                type: Number
+            },
+        }
+    })
+
+    /*组件:一共默认的16个方块
+                  numid :  第几块方块
+              chessData :  游戏数据 4*4
+                  chess :  利用游戏数据形成的16位数组
+            getRandom() :  产生随机数
+       getsj(x,y,score) :  测试:产生指定的随机数 x y 坐标 score 分值
+         cshChessData() :  初始化数组
+              */
+    var tzfe = Vue.component('tzfe-blocks', {
+        props: {
+            numid: { // 代表第几个方块
+                type: Number,
+                default: 0
+            }
+        },
+        data() {
+            return {
+                chessData: chessData
+            }
+        },
+        computed: {
+            chess: function() { //返回长度为16的数组 并且记录着值
+                var isc = new Array();
+                for (var i = 0; i < this.chessData.length; i++) {
+                    for (var j = 0; j < this.chessData[i].length; j++) {
+                        isc.push(this.chessData[i][j])
+                    }
+                }
+                return isc
+            }
+        },
+        watch: {
+            chessData: function(newValue, oldValue) {},
+            deep: true
+        },
+        template: `<div>        
+           <div  :class="['ysd-tzfe-blocks-'+n]" v-for="n in 16">
+               <tzfe-scroke  v-if="chess[n-1]>0" :score="chess[n-1]" :n="n">
+               </tzfe-scroke>
+           </div>
+        </div>`,
+        methods: {
+            getRandom() {
+                let sjs = [2, 4];
+                let index = parseInt(2 * Math.random());
+                var fz = sjs[index];
+                while (true) {
+                    let sjsz = parseInt(16 * Math.random()) + 1;
+                    let x = parseInt(sjsz / 4)
+                    if (sjsz % 4 == 0)
+                        x--;
+                    let y = sjsz % 4 - 1;
+                    if (y == -1)
+                        y = 3
+                    if (this.chessData[x][y] == 0) {
+                        this.$set(this.chessData[x], y, fz)
+                        return {
+                            score: fz, //分叔
+                            x: x, // x坐标
+                            y: y, // y坐标
+                            zs: sjsz // 在16位数组的位置
+                        }
+                    }
+                }
+            },
+            getsj(x, y, score) {
+                this.$set(this.chessData[x], y, score)
+            },
+            cshChessData() { //初始化数组
+                for (let i = 0; i < this.chessData.length; i++) {
+                    for (let j = 0; j < this.chessData[i].length; j++) {
+                        this.$set(this.chessData[i], [j], 0);
+                    }
+                }
+            }
+        },
+    })
+    /*渲染页面
+       挂载 : #ysd-tzfe-all,
+       方法 : 
+                         keyEvent() : 键盘移动事件
+                         moveLeft() : 左移动
+                          moveTop() : 上移动
+                        moveRight() : 右移动
+                       moveBottom() : 下移动
+                  moveTopAnimate1() : 上下移动动画
+                  moveTopAnimate2() : 上下合并动画
+                 moveLeftAnimate1() : 左右移动动画
+                 moveLeftAnimate2() : 左右合并动画
+    moveLeftAnimate1(arr,arr1,arr2) : 左右移动动画
+         moveLeftAnimate2(arr,arr1) : 左边合并动画
+                        getJq(x, y) : 获取divjquery对象    
+                     clicknewGame() : 点击重新开始事件
+                        WinOrLose() : 判断输赢 0输1未分出胜负2赢
+                      getNewChess() : 根据子组件的chessData返回一个新的数组           
+   钩子函数 : mounted : el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子
+  
+    */
+    let vm = new Vue({
+        el: "#ysd-tzfe-all",
+        data: {
+            time: (new Date()).valueOf(), //记录上一次时间戳
+            frequency: 0, //记录按键几次
+            score: 0 //记录分值
+        },
+        watch:{
+            score(newValue,oldValue){
+                $(".animated").addClass("rubberBand")
+                 window.setTimeout(()=>{
+              $(".animated").removeClass("rubberBand")
+                 },800)
+            }
+        },
+        methods: { //方法
+
+        	topswipe(e){
+				this.keyEvent({
+        			"keyCode":38
+        		})
+        	},
+        	bottomswipe(e){
+				this.keyEvent({
+        			"keyCode":40
+        		})
+        	},
+
+        	rightswipe(e){
+				this.keyEvent({
+        			"keyCode":37
+        		})
+        	},
+        	// 左滑动
+        	leftswipe(e){
+        		this.keyEvent({
+        			"keyCode":39
+        		})
+        	},
+            keyEvent: function(e) { //键盘事件
+                //e.keyCode 37 38 39 40 左上右下
+                if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40) {
+                    this.frequency++;
+                    if ((new Date()).valueOf() - this.time < 300 && this.frequency != 1) {
+                        return;
+                    }
+                    window.setTimeout(() => { //没有this 
+                        window.sessionStorage.setItem('GameDate', JSON.stringify(this.$refs.allblock.chessData));
+                        let isJudge = this.WinOrLose();
+                        if (isJudge === 0) {
+                            alert("很遗憾你输了,总分数:"+this.score+"分")
+                        }
+                        if (isJudge === 2) {
+                            alert("恭喜你 你赢了")
+                        }
+                    }, 500)
+                }
+                switch (e.keyCode) {
+                    case 37: //左 
+                        this.moveLeft()
+                        // this.$refs.allblock.getRandom();
+                        break;
+                    case 38: //上
+                        this.moveTop();
+                        break;
+                    case 39: //右
+                        this.moveRight();
+                        break;
+                    case 40: //下 
+                        this.moveBottom();
+                        break;
+                }
+                //console.log(this.$refs.allblock.chessData)
+            },
+            getNewChess() { //根据ChessDate返回一个新的数组
+                let blocks = this.$refs.allblock; // 获取子组件
+                let data = blocks.chessData;
+                let Datas = new Array();
+                let Datas1 = new Array();
+                let Datas2 = new Array();
+                let Datas3 = new Array();
+                let Datas4 = new Array();
+                Datas1 = [].concat(data[0]);
+                Datas2 = [].concat(data[1]);
+                Datas3 = [].concat(data[2]);
+                Datas4 = [].concat(data[3]);
+                Datas = [Datas1, Datas2, Datas3, Datas4];
+                return Datas;
+            },
+            moveLeft() { //左
+                let arr1 = new Array(); //第一次移动
+                let arr2 = new Array(); //移动后合并
+                let arr3 = new Array(); //合并后继续移动
+                let Datas = this.getNewChess();
+                //移动
+                for (let i = 0; i < Datas.length; i++) {
+                    for (let j = 0; j < Datas[i].length; j++) {
+                        if (Datas[i][j] === 0) { //移动 取消空格
+                            for (let k = j + 1; k < Datas[i].length; k++) {
+                                if (Datas[i][k] != 0) {
+                                    let temp = Datas[i][k];
+                                    Datas[i][j] = temp;
+                                    Datas[i][k] = 0;
+                                    arr1.push({ x1: i, y1: k, x2: i, y2: j });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    // 合并
+                    for (let j = 1; j < Datas[i].length; j++) {
+                        if (Datas[i][j] != 0 && Datas[i][j] === Datas[i][j - 1]) {
+                            let temp = Datas[i][j] + Datas[i][j - 1];
+                            Datas[i][j - 1] = temp;
+                            Datas[i][j] = 0;
+                            arr2.push({ x1: i, y1: j, x2: i, y2: j - 1 });
+
+                        }
+                    }
+                    //合并后再次移动
+                    for (let j = 0; j < Datas[i].length; j++) {
+                        if (Datas[i][j] === 0) { //移动 取消空格
+                            for (let k = j + 1; k < Datas[i].length; k++) {
+                                if (Datas[i][k] != 0) {
+                                    let temp = Datas[i][k];
+                                    Datas[i][j] = temp;
+                                    Datas[i][k] = 0;
+                                    arr3.push({ x1: i, y1: k, x2: i, y2: j });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (arr1.length === 0 && arr2.length === 0 && arr3.length == 0) { //没有产生任何操作时
+                    return;
+                }
+                this.time = (new Date()).valueOf();
+                this.moveLeftAnimate1(arr1, arr2, arr3)
+            },
+            moveTop() { //上
+                let arr1 = new Array(); //第一次移动
+                let arr2 = new Array(); //移动后合并
+                let arr3 = new Array(); //合并后继续移动
+                let Datas = this.getNewChess();
+                for (let i = 0; i < Datas.length; i++) {
+                    for (let j = 0; j < Datas[i].length; j++) { // j是第一个坐标 i是第二个
+                        if (Datas[j][i] === 0) {
+                            for (let k = j + 1; k < Datas[i].length; k++) {
+                                if (Datas[k][i] != 0) {
+                                    let temp = Datas[k][i];
+                                    Datas[j][i] = temp;
+                                    Datas[k][i] = 0;
+                                    arr1.push({ x1: k, y1: i, x2: j, y2: i });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (let j = 1; j < Datas[i].length; j++) {
+                        if (Datas[j][i] != 0 && Datas[j][i] == Datas[j - 1][i]) {
+                            let temp = Datas[j][i] + Datas[j - 1][i];
+                            Datas[j - 1][i] = temp;
+                            Datas[j][i] = 0;
+                            arr2.push({ x1: j, y1: i, x2: j - 1, y2: i });
+                        }
+                    }
+                    for (let j = 0; j < Datas[i].length; j++) { // j是第一个坐标 i是第二个
+                        if (Datas[j][i] === 0) {
+                            for (let k = j + 1; k < Datas[i].length; k++) {
+                                if (Datas[k][i] != 0) {
+                                    let temp = Datas[k][i];
+                                    Datas[j][i] = temp;
+                                    Datas[k][i] = 0;
+                                    arr3.push({ x1: k, y1: i, x2: j, y2: i });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (arr1.length === 0 && arr2.length === 0 && arr3.length == 0) { //没有产生任何操作时
+                    return;
+                }
+                this.time = (new Date()).valueOf();
+                this.moveTopAnimate1(arr1, arr2, arr3)
+            },
+            moveRight() { //右
+                let arr1 = new Array(); //第一次移动
+                let arr2 = new Array(); //移动后合并
+                let arr3 = new Array(); //合并后继续移动
+                let Datas = this.getNewChess();
+                //移动
+                for (let i = 0; i < Datas.length; i++) {
+                    for (let j = Datas[i].length - 1; j >= 0; j--) {
+                        if (Datas[i][j] === 0) { //移动 取消空格
+                            for (let k = j - 1; k >= 0; k--) {
+                                if (Datas[i][k] != 0) {
+                                    let temp = Datas[i][k];
+                                    Datas[i][j] = temp;
+                                    Datas[i][k] = 0;
+                                    arr1.push({ x1: i, y1: k, x2: i, y2: j });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    // 合并
+                    for (let j = Datas[i].length - 2; j >= 0; j--) {
+                        if (Datas[i][j] != 0 && Datas[i][j] === Datas[i][j + 1]) {
+                            let temp = Datas[i][j] + Datas[i][j + 1];
+                            Datas[i][j + 1] = temp;
+                            Datas[i][j] = 0;
+                            arr2.push({ x1: i, y1: j, x2: i, y2: j + 1 });
+
+                        }
+                    }
+                    //合并后再次移动
+                    for (let j = Datas[i].length - 1; j >= 0; j--) {
+                        if (Datas[i][j] === 0) { //移动 取消空格
+                            for (let k = j - 1; k >= 0; k--) {
+                                if (Datas[i][k] != 0) {
+                                    let temp = Datas[i][k];
+                                    Datas[i][j] = temp;
+                                    Datas[i][k] = 0;
+                                    arr3.push({ x1: i, y1: k, x2: i, y2: j });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (arr1.length === 0 && arr2.length === 0 && arr3.length == 0) { //没有产生任何操作时
+                    return;
+                }
+                this.time = (new Date()).valueOf();
+                this.moveLeftAnimate1(arr1, arr2, arr3)
+            },
+            moveBottom() { //下
+                let arr1 = new Array(); //第一次移动
+                let arr2 = new Array(); //移动后合并
+                let arr3 = new Array(); //合并后继续移动
+                let Datas = this.getNewChess();
+
+                for (let i = 0; i < Datas.length; i++) {
+                    for (let j = Datas[i].length - 1; j >= 0; j--) { // j是第一个坐标 i是第二个
+                        if (Datas[j][i] === 0) {
+                            for (let k = j - 1; k >= 0; k--) {
+                                if (Datas[k][i] != 0) {
+                                    let temp = Datas[k][i];
+                                    Datas[j][i] = temp;
+                                    Datas[k][i] = 0;
+                                    arr1.push({ x1: k, y1: i, x2: j, y2: i });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for (let j = Datas[i].length - 2; j >= 0; j--) {
+                        if (Datas[j][i] != 0 && Datas[j][i] == Datas[j + 1][i]) {
+                            let temp = Datas[j][i] + Datas[j + 1][i];
+                            Datas[j + 1][i] = temp;
+                            Datas[j][i] = 0;
+                            arr2.push({ x1: j, y1: i, x2: j + 1, y2: i });
+                        }
+                    }
+                    for (let j = Datas[i].length - 1; j >= 0; j--) { // j是第一个坐标 i是第二个
+                        if (Datas[j][i] === 0) {
+                            for (let k = j - 1; k >= 0; k--) {
+                                if (Datas[k][i] != 0) {
+                                    let temp = Datas[k][i];
+                                    Datas[j][i] = temp;
+                                    Datas[k][i] = 0;
+                                    arr3.push({ x1: k, y1: i, x2: j, y2: i });
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (arr1.length === 0 && arr2.length === 0 && arr3.length == 0) { //没有产生任何操作时
+                    return;
+                }
+                this.time = (new Date()).valueOf();
+
+                this.moveTopAnimate1(arr1, arr2, arr3)
+            },
+            moveTopAnimate1(arr, arr1, arr2) { //移动动画 上下
+                let blocks = this.$refs.allblock; // 获取子组件
+                let yc = 0;
+                if (arr1 == null && arr2 == null) {
+                    yc = 50;
+                }
+                window.setTimeout(() => {
+                    for (let i = 0; i < arr.length; i++) {
+                        let x1 = arr[i].x1;
+                        let y1 = arr[i].y1;
+                        let x2 = arr[i].x2;
+                        let y2 = arr[i].y2;
+                        let $div = this.getJq(x1, y1);
+                        let moveLength = (x1 - x2) * 74;
+                        $div.addClass("tran")
+                        $div.css("margin-top", -moveLength + "px");
+                    }
+                    window.setTimeout(() => {
+                        for (let i = 0; i < arr.length; i++) {
+                            let x1 = arr[i].x1;
+                            let y1 = arr[i].y1;
+                            let x2 = arr[i].x2;
+                            let y2 = arr[i].y2;
+                            let temp = blocks.chessData[x1][y1]
+                            this.$set(blocks.chessData[x2], y2, temp);
+                            this.$set(blocks.chessData[x1], y1, 0);
+                            Vue.nextTick(() => {
+                                let $div = this.getJq(x2, y2);
+                                $div.removeClass("tran");
+                                $div.css("margin-top", "0");
+                            })
+                        }
+                        if (arr1 == null && arr2 == null) {
+                            window.setTimeout(() => {
+                                blocks.getRandom()
+                            }, 50)
+                            return;
+                        }
+                        this.moveTopAnimate2(arr1, arr2)
+                    }, 50)
+                }, yc)
+            },
+            moveTopAnimate2(arr, arr1) { //合并动画 上下
+                let blocks = this.$refs.allblock; // 获取子组件
+                for (let i = 0; i < arr.length; i++) {
+                    let x1 = arr[i].x1;
+                    let y1 = arr[i].y1;
+                    let x2 = arr[i].x2;
+                    let y2 = arr[i].y2;
+                    let $div = this.getJq(x1, y1);
+                    let moveLength = (x1 - x2) * 74;
+                    $div.addClass("tran")
+                    $div.css("margin-top", -moveLength + "px");
+                }
+                window.setTimeout(() => {
+                    for (let i = 0; i < arr.length; i++) {
+                        let x1 = arr[i].x1;
+                        let y1 = arr[i].y1;
+                        let x2 = arr[i].x2;
+                        let y2 = arr[i].y2;
+                        let temp = blocks.chessData[x1][y1] + blocks.chessData[x2][y2]
+                        this.score += temp;
+                        window.sessionStorage.setItem("score", this.score)
+                        this.$set(blocks.chessData[x2], y2, temp);
+                        this.$set(blocks.chessData[x1], y1, 0);
+                        Vue.nextTick(() => {
+                            let $div = this.getJq(x2, y2);
+                            $div.animate({ width: "80px", height: "72px" }, 100, () => {
+                                $div.css({ width: "64px", height: "64px" })
+                            })
+                            $div.removeClass("tran");
+                            $div.css("margin-top", "0");
+                        })
+                    }
+                    this.moveTopAnimate1(arr1, null, null)
+                }, 60)
+            },
+            moveLeftAnimate1(arr, arr1, arr2) { //移动动画 左右    
+                let blocks = this.$refs.allblock; // 获取子组件
+                let yc = 0;
+                if (arr1 == null && arr2 == null) {
+                    yc = 50;
+                }
+                window.setTimeout(() => {
+                    for (let i = 0; i < arr.length; i++) {
+                        let x1 = arr[i].x1;
+                        let y1 = arr[i].y1;
+                        let x2 = arr[i].x2;
+                        let y2 = arr[i].y2;
+                        let $div = this.getJq(x1, y1);
+                        let moveLength = (y1 - y2) * 74;
+                        $div.addClass("tran")
+                        $div.css("margin-left", -moveLength + "px");
+
+                    }
+                    window.setTimeout(() => {
+                        for (let i = 0; i < arr.length; i++) {
+                            let x1 = arr[i].x1;
+                            let y1 = arr[i].y1;
+                            let x2 = arr[i].x2;
+                            let y2 = arr[i].y2;
+                            let temp = blocks.chessData[x1][y1]
+                            this.$set(blocks.chessData[x2], y2, temp);
+                            this.$set(blocks.chessData[x1], y1, 0);
+                            Vue.nextTick(() => {
+                                let $div = this.getJq(x2, y2);
+                                $div.removeClass("tran");
+                                $div.css("margin-left", "0");
+                            })
+                        }
+                        if (arr1 == null && arr2 == null) {
+                            window.setTimeout(() => {
+                                blocks.getRandom()
+                            }, 150)
+                            return;
+                        }
+                        this.moveLeftAnimate2(arr1, arr2)
+                    }, 50)
+                }, yc)
+            },
+            moveLeftAnimate2(arr, arr1) { //合并动画 左右
+                let blocks = this.$refs.allblock; // 获取子组件
+                for (let i = 0; i < arr.length; i++) {
+                    let x1 = arr[i].x1;
+                    let y1 = arr[i].y1;
+                    let x2 = arr[i].x2;
+                    let y2 = arr[i].y2;
+                    let $div = this.getJq(x1, y1);
+                    let moveLength = (y1 - y2) * 74;
+                    $div.addClass("tran")
+                    $div.css("margin-left", -moveLength + "px");
+                }
+                window.setTimeout(() => {
+                    for (let i = 0; i < arr.length; i++) {
+                        let x1 = arr[i].x1;
+                        let y1 = arr[i].y1;
+                        let x2 = arr[i].x2;
+                        let y2 = arr[i].y2;
+                        let temp = blocks.chessData[x1][y1] + blocks.chessData[x2][y2]
+                        this.score += temp;
+                        window.sessionStorage.setItem("score", this.score)
+                        this.$set(blocks.chessData[x2], y2, temp);
+                        this.$set(blocks.chessData[x1], y1, 0);
+                        Vue.nextTick(() => {
+                            let $div = this.getJq(x2, y2);
+                            $div.animate({ width: "80px", height: "72px" }, 100, () => {
+                                $div.css({ width: "64px", height: "64px" })
+                            })
+                            $div.removeClass("tran");
+                            $div.css("margin-left", "0");
+                        })
+                    }
+                    this.moveLeftAnimate1(arr1, null, null)
+                }, 110)
+            },
+            getJq(x, y) { //获取指定的div
+                let num = (x) * 4 + y + 1 // 在16位数组的下标
+                return $(".ysd-tzfe-block .ysd-tzfe-blocks-" + num + " div");
+            },
+            clicknewGame() { //点击初始化
+                let blocks = this.$refs.allblock;
+                blocks.cshChessData();
+                blocks.getRandom();
+                blocks.getRandom();
+                this.score = 0;
+                window.sessionStorage.setItem("GameDate", JSON.stringify(blocks.chessData));
+                window.sessionStorage.removeItem("score");
+            },
+            WinOrLose() { //判断输赢 0输1未分出胜负2赢
+                let Datas = this.getNewChess();
+                let isJudge = 0;
+                let isj = 0;
+                for (let i = 0; i < Datas.length; i++) {
+                    for (let j = 1; j < Datas[i].length; j++) { //查找左
+                        if (Datas[i][j] != 0 && Datas[i][j] === Datas[i][j - 1]) {
+                            isJudge = 1;
+                        }
+                    }
+                    for (let j = 1; j < Datas[i].length; j++) { //查找上
+                        if (Datas[j][i] != 0 && Datas[j][i] == Datas[j - 1][i]) {
+                            isJudge = 1;
+                        }
+                    }
+                    for (let j = Datas[i].length - 2; j >= 0; j--) { //查找右
+                        if (Datas[i][j] != 0 && Datas[i][j] === Datas[i][j + 1]) {
+                            isJudge = 1;
+                        }
+                    }
+                    for (let j = Datas[i].length - 2; j >= 0; j--) { //查找下
+                        if (Datas[j][i] != 0 && Datas[j][i] == Datas[j + 1][i]) {
+                            isJudge = 1;
+                        }
+                    }
+                    for (let j = 0; j < Datas[i].length; j++) {
+                        if (Datas[i][j] === 2048) {
+                            isJudge = 2;
+                            return isJudge;
+                        }
+                        if (Datas[i][j] === 0) {
+                            isj = 1;
+                        }
+                    }
+                }
+                if (isj === 1) {
+                    return isj;
+                }
+                return isJudge;
+            }
+        },
+        mounted: function() { //钩子
+            if (f == null) {
+                let xy1 = this.$refs.allblock.getRandom();
+                let xy2 = this.$refs.allblock.getRandom();
+                window.sessionStorage.setItem("GameDate", JSON.stringify(this.$refs.allblock.chessData));
+            }
+            let score = parseInt(window.sessionStorage.getItem("score"));
+            if (isNaN(score)) {
+                score = 0;
+            }
+            this.score = score;
+            window.onkeydown = (e) => {
+                vm.keyEvent(e)
+            }
+        }
+    });
+    </script>
+</body>
+</html>
