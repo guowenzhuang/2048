@@ -5,10 +5,9 @@
     <br> 
 </p>
 ## 🚀 运行
-```python
 
+```java
 git clone https://github.com/guowenzhuang/2048.git
-
  ```
 打开index.html
 ## 🎨 图例 <a name = "tuli"></a>
