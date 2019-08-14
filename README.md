@@ -5,7 +5,7 @@
     <br> 
 </p>
 ## 🚀 运行
-```
+```java
 
 git clone https://github.com/guowenzhuang/2048.git
 
