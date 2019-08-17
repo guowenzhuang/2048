@@ -3,381 +3,551 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,minimum=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no, email=no">
     <title>2048</title>
     <script type="text/javascript" src="js/vue.js"></script>
     <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="js/axios.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/animate.css">
+    <link rel="stylesheet" type="text/css" href="css/light.min.css">
+
     <style>
-    html,
-    body {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
-	#ysd-tzfe-all{
-	 width: 100%;
-        height: 100%;
-         display: flex;
-        justify-content: center;
-        align-items: center;
-}
-    .ysd-tzfe-newGame {
-        background-color: #887A6D;
-        border: none;
-        outline: none;
-        width: 100px;
-        padding: 15px 0px 15px 0;
-        cursor: pointer;
-        color: #FFF;
-        border-radius: 15px;
-       /*  margin-left: 35%; */
-    }
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: rgb(248, 248, 248);
+        }
+        ::-webkit-scrollbar{width:0;height:1px}
+        ::-webkit-scrollbar-thumb{
+            border-radius:5px;
+            -webkit-box-shadow:inset 0 0 5px rgba(0,0,0,.2);
+            background:rgba(0,0,0,.2)}
+        #ysd-tzfe-all {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    h3 {
-       /*  margin-left: 40%; */
-    }
+        .ysd-tzfe-newGame {
+            background-color: #887A6D;
+            border: none;
+            outline: none;
+            width: 100px;
+            padding: 15px 0px 15px 0;
+            cursor: pointer;
+            color: #FFF;
+            border-radius: 15px;
+            /*  margin-left: 35%; */
+        }
 
-    .ysd-tzfe-block {
-        width: 300px;
-        background-color: #BBADA0;
-        overflow: auto;
-        padding-right: 10px;
-        padding-bottom: 10px;
-    }
+        h3 {
+            /*  margin-left: 40%; */
+        }
 
-    .ysd-tzfe-block div {
-        width: 64px;
-        height: 64px;
-        background-color: #CCC0B2;
-        float: left;
-        margin-top: 10px;
-        margin-left: 10px;
-    }
+        .ysd-tzfe-block {
+            width: 300px;
+            background-color: #BBADA0;
+            overflow: auto;
+            padding-right: 10px;
+            padding-bottom: 10px;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score {
-        font-size: 50px;
-        line-height: 60px;
-        text-align: center;
-        margin: 0;
-        position: relative;
-        z-index: 1;
-    }
+        .ysd-tzfe-block div {
+            width: 64px;
+            height: 64px;
+            background-color: #CCC0B2;
+            float: left;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
 
-    .tran {
-        transition: all 0.1s linear;
-        -moz-transition: all 0.1s linear;
-        -webkit-transition: all 0.1s linear;
-        -o-transition: all 0.1s linear;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score {
+            font-size: 50px;
+            line-height: 60px;
+            text-align: center;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
 
-    .ysd-tzfe-score-0 {
-        background-color: #ccc0b2;
-        color: #ccc0b2;
-    }
+        .tran {
+            transition: all 0.1s linear;
+            -moz-transition: all 0.1s linear;
+            -webkit-transition: all 0.1s linear;
+            -o-transition: all 0.1s linear;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-2 {
-        background-color: #eee4da;
-        color: #776e65;
-    }
+        .ysd-tzfe-score-0 {
+            background-color: #ccc0b2;
+            color: #ccc0b2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-4 {
-        background-color: #ede0c8;
-        color: #776e65;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-2 {
+            background-color: #eee4da;
+            color: #776e65;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-8 {
-        background-color: #f2b179;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-4 {
+            background-color: #ede0c8;
+            color: #776e65;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-16 {
-        background-color: #f59563;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-8 {
+            background-color: #f2b179;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-32 {
-        background-color: #f67c5f;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-16 {
+            background-color: #f59563;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-64 {
-        background-color: #f65e3b;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-32 {
+            background-color: #f67c5f;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-128 {
-        font-size: 25px;
-        background-color: #edc850;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-64 {
+            background-color: #f65e3b;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-256 {
-        font-size: 25px;
-        background-color: #edc850;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-128 {
+            font-size: 25px;
+            background-color: #edc850;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-512 {
-        font-size: 25px;
-        background-color: #edc850;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-256 {
+            font-size: 25px;
+            background-color: #edc850;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-1024 {
-        font-size: 20px;
-        background-color: #edc850;
-        color: #f9f6f2;
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-512 {
+            font-size: 25px;
+            background-color: #edc850;
+            color: #f9f6f2;
+        }
 
-    .ysd-tzfe-block .ysd-tzfe-score-2048 {
-        font-size: 20px;
-        background-color: #edc850;
-        color: #f9f6f2;
-    }
-    #ysd-tzfe-all{
-        display: flex;
-        justify-content: center;
-        flex-direction:column;  
-    }
+        .ysd-tzfe-block .ysd-tzfe-score-1024 {
+            font-size: 20px;
+            background-color: #edc850;
+            color: #f9f6f2;
+        }
+
+        .ysd-tzfe-block .ysd-tzfe-score-2048 {
+            font-size: 20px;
+            background-color: #edc850;
+            color: #f9f6f2;
+        }
+
+        #ysd-tzfe-all {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .phb {
+            position: absolute;
+            right: calc(50vw - 130px);
+            top: 26vh;
+            background-color: #96958e;
+            border: none;
+            outline: none;
+            padding: 4px 6px 4px 6px;
+            cursor: pointer;
+            color: #FFF;
+            border-radius: 8px;
+        }
+
+        #cover {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            background: rgba(0, 0, 0, 0.4);
+            width: 100%; /*宽度设置为100%，这样才能使隐藏背景层覆盖原页面*/
+            height: 100%;
+            filter: alpha(opacity=60); /*设置透明度为60%*/
+            opacity: 0.6; /*非IE浏览器下设置透明度为60%*/
+            display: none;
+            z-Index: 999;
+        }
+
+        #modal {
+            top: 5vh;
+            position: absolute;
+            width: 98vw;
+            height: 95vh;
+            background-color: rgb(248, 248, 248);
+            display: none;
+            cursor: pointer;
+            z-Index: 9999;
+            overflow: auto;
+            padding: 0 1vw;
+        }
+
+        .close-phb {
+            float: right;
+            font-size: 16px;
+        }
+
+
+        .pswp__preloader__icn {
+            opacity: 0.75;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: clockwise 500ms linear infinite;
+            animation: clockwise 500ms linear infinite;
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 1;
+        }
+
+        /* The idea of animating inner circle is based on Polymer loading indicator by Keanu Lee https://blog.keanulee.com/2014/10/20/the-tale-of-three-spinners.html */
+        .pswp__preloader__cut {
+            width: 12px;
+            height: 24px;
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .pswp__preloader__donut {
+            box-sizing: border-box;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #000;
+            border-radius: 50%;
+            border-left-color: transparent;
+            border-bottom-color: transparent;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: none;
+            margin: 0;
+            -webkit-animation: donut-rotate 1000ms cubic-bezier(.4, 0, .22, 1) infinite;
+            animation: donut-rotate 1000ms cubic-bezier(.4, 0, .22, 1) infinite;
+        }
+
+        @-webkit-keyframes clockwise {
+            0% {
+                -webkit-transform: rotate(0deg)
+            }
+            100% {
+                -webkit-transform: rotate(360deg)
+            }
+        }
+
+        @keyframes clockwise {
+            0% {
+                transform: rotate(0deg)
+            }
+            100% {
+                transform: rotate(360deg)
+            }
+        }
+
+        @-webkit-keyframes donut-rotate {
+            0% {
+                -webkit-transform: rotate(0)
+            }
+            50% {
+                -webkit-transform: rotate(-140deg)
+            }
+            100% {
+                -webkit-transform: rotate(0)
+            }
+        }
+
+        @keyframes donut-rotate {
+            0% {
+                transform: rotate(0)
+            }
+            50% {
+                transform: rotate(-140deg)
+            }
+            100% {
+                transform: rotate(0)
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div id="ysd-tzfe-all"
-     v-swipeleft="leftswipe" 
+<div id="ysd-tzfe-all"
+     v-swipeleft="leftswipe"
      v-swiperight="rightswipe"
      v-swipeup="topswipe"
      v-swipedown="bottomswipe">
-        <button class="ysd-tzfe-newGame" @click="clicknewGame">New Game</button>
-        <h3 class="animated">score:<span class="ysd-tzfe-scores">{{score}}</span></h3>
-        <transition name="ysd-tzfe">
-            <tzfe-blocks class="ysd-tzfe-block"  ref="allblock">
-                </tzfe-blocks>
-        </transition>
+    <button class="ysd-tzfe-newGame" @click="clicknewGame">开始游戏</button>
+    <button class="phb" @click="phbShow">
+        排行榜
+    </button>
+    <h3 class="animated">分数:<span class="ysd-tzfe-scores">{{score}}</span></h3>
+    <transition name="ysd-tzfe">
+        <tzfe-blocks class="ysd-tzfe-block" ref="allblock">
+        </tzfe-blocks>
+    </transition>
+    <div id="cover"></div>
+    <div id="modal">
+        <span class="close-phb" @click="phbClose">关闭</span>
+        <div style="clear: both">
+        </div>
+        <table>
+            <tr>
+                <th>排名</th>
+                <th>姓名</th>
+                <th>地区</th>
+                <th>分数</th>
+            </tr>
+            <tr v-for="(item,index) in phbData">
+                <td>{{index+1}}</td>
+                <td>{{item.name}}</td>
+                <td>{{item.addr}}</td>
+                <td>{{item.score}}</td>
+            </tr>
+        </table>
+        <div style="text-align: center;">
+            <button  @click="phbClose">关闭排行榜</button>
+        </div>
     </div>
-    <script type="text/javascript">
+    <div id="pswp" class="pswp__preloader__icn">
+        <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
 
-    	/**
- * 处理 移动设备上的 点击、长按、左右上下滑动 事件
- *
- * =========================================
- * 导出了7个自定义指令：
- *  v-tap： tap点击事件
- *  v-swipe： swipe滑动事件
- *  v-swipeleft： swipeleft左滑事件
- *  v-swiperight： swiperight右滑事件
- *  v-swipedown： swipedown下滑
- *  v-swipeup： swipeup上滑
- *  v-longtap： longtap长按
- * =========================================
- *
- * =========================================
- * 包含四个参数
- * stop 阻止冒泡
- * prevent 阻止默认事件
- * self 只当在 event.target 是当前元素自身时触发处理函数
- * once 执行一次后解绑
- *
- * @example v-tap.stop.prevent.self.once
- * =========================================
- *
- * =========================================
- * 事件绑定有两种方式
- * @example
- *  1. v-tap="showDialog" 绑定一个方法对象
- *  2. v-tap="{fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}"
- *      绑定一个JSON字面量，fn是执行的方法，后边的是需要传递的参数
- * 事件回调参数
- * @param 第一个参数是event，事件对象
- * @param 第二个参数是 binding.value，也就是v-tap=""双引号中的部分（如示例2，第二个参数就是 {fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}）
- * =========================================
- *
- * @update
- *  1. 根据MUI进行了滑动事件的判断修正
- *  2. 根据TouchEvent修正了点击位置的判断
- *
- */
+    /**
+     * 处理 移动设备上的 点击、长按、左右上下滑动 事件
+     *
+     * =========================================
+     * 导出了7个自定义指令：
+     *  v-tap： tap点击事件
+     *  v-swipe： swipe滑动事件
+     *  v-swipeleft： swipeleft左滑事件
+     *  v-swiperight： swiperight右滑事件
+     *  v-swipedown： swipedown下滑
+     *  v-swipeup： swipeup上滑
+     *  v-longtap： longtap长按
+     * =========================================
+     *
+     * =========================================
+     * 包含四个参数
+     * stop 阻止冒泡
+     * prevent 阻止默认事件
+     * self 只当在 event.target 是当前元素自身时触发处理函数
+     * once 执行一次后解绑
+     *
+     * @example v-tap.stop.prevent.self.once
+     * =========================================
+     *
+     * =========================================
+     * 事件绑定有两种方式
+     * @example
+     *  1. v-tap="showDialog" 绑定一个方法对象
+     *  2. v-tap="{fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}"
+     *      绑定一个JSON字面量，fn是执行的方法，后边的是需要传递的参数
+     * 事件回调参数
+     * @param 第一个参数是event，事件对象
+     * @param 第二个参数是 binding.value，也就是v-tap=""双引号中的部分（如示例2，第二个参数就是 {fn:click123, param1:1, param2:2, param3:{aaa:'123'} ...}）
+     * =========================================
+     *
+     * @update
+     *  1. 根据MUI进行了滑动事件的判断修正
+     *  2. 根据TouchEvent修正了点击位置的判断
+     *
+     */
 
-/**
- * vue上点击事件处理类
- */
-class VueTouch {
-  /**
-   * @param el
-   * @param binding
-   * @param type
-   */
-  constructor(el, binding, type) {
-    
-    let g = this;
-    
-    g.obj = el;
-    g.binding = binding;
-    g.touchType = type;
-    
-    g.firstTouchPosition = {x: 0, y: 0};
-    g.firstTouchTime = 0;
-    g.callBack = typeof(binding.value) === "object" ? binding.value.fn : binding.value;
-    
-    g.moved = false;
-    g.leaved = false;
-    g.longTouched = false;
-    
-    // 事件监听回调集合
-    let _listener = Object.create(null);
-    
-    // 事件方法
-    let _listen = (type) => {
-      return function (e) {
-        let {stop, prevent, self, once} = g.binding.modifiers;
-        
-        // 配置判断
-        if (stop) e.stopPropagation();
-        if (prevent) e.preventDefault();
-        if (once) g.obj.removeEventListener("touch" + type, _listener[type]);
-        if (self && e.target !== e.currentTarget) return;
-        
-        g[type](e);
-      }
-    };
-    
-    _listener.start = _listen('start');
-    _listener.end = _listen('end');
-    _listener.move = _listen('move');
-    
-    this.obj.addEventListener("touchstart", _listener.start, false);
-    this.obj.addEventListener("touchend", _listener.end, false);
-    this.obj.addEventListener("touchmove", _listener.move, false);
-  }
-  
-  start(e) {
-    
-    let g = this;
-  
-    // 初始化点击状态
-    g.moved = false;
-    g.leaved = false;
-    g.longTouched = false;
-    
-    g.firstTouchPosition = g.getMultiCenter(e.changedTouches);
-    g.firstTouchTime = e.timeStamp;
-    g.time = setTimeout(function () {
-      if (!g.leaved && !g.moved) {
-        g.touchType === "longtap" && g.callBack(e, g.binding.value);
-        g.longTouched = true;
-      }
-    }.bind(g), 1000);
-  }
-  
-  end(e) {
-    
-    let g = this;
-    
-    let {x, y} = g.getMultiCenter(e.changedTouches);
-    let _disX = x - g.firstTouchPosition.x;
-    let _disY = y - g.firstTouchPosition.y;
-    let _dis = Math.sqrt(_disX * _disX + _disY * _disY);
-    let _timeDis = e.timeStamp - g.firstTouchTime;
-    
-    clearTimeout(g.time);
-    
-    let _angle = this.getAngle(_disX, _disY);
-    
-    if (_dis > 18 && _timeDis < 300) {
-      g.touchType === "swipe" && g.callBack(e, g.binding.value);
-      if (_angle >= 60 && _angle <= 120)
-        g.touchType === "swipedown" && g.callBack(e, g.binding.value);
-      if (_angle <= -60 && _angle >= -120)
-        g.touchType === "swipeup" && g.callBack(e, g.binding.value);
-      if (_angle <= 20 && _angle >= -20)
-        g.touchType === "swipeleft" && g.callBack(e, g.binding.value);
-      if ((_angle <= -160 && _angle >-180) || (_angle >= 160 && _angle <= 180))
-        g.touchType === "swiperight" && g.callBack(e, g.binding.value);
-    } else {
-      if (!g.longTouched && !g.moved) {
-        g.touchType === "tap" && g.callBack(e, g.binding.value);
-        g.leaved = true;
-      }
+    /**
+     * vue上点击事件处理类
+     */
+    class VueTouch {
+        /**
+         * @param el
+         * @param binding
+         * @param type
+         */
+        constructor (el, binding, type) {
+
+            let g = this;
+
+            g.obj = el;
+            g.binding = binding;
+            g.touchType = type;
+
+            g.firstTouchPosition = {x: 0, y: 0};
+            g.firstTouchTime = 0;
+            g.callBack = typeof (binding.value) === "object" ? binding.value.fn : binding.value;
+
+            g.moved = false;
+            g.leaved = false;
+            g.longTouched = false;
+
+            // 事件监听回调集合
+            let _listener = Object.create(null);
+
+            // 事件方法
+            let _listen = (type) => {
+                return function (e) {
+                    let {stop, prevent, self, once} = g.binding.modifiers;
+
+                    // 配置判断
+                    if (stop) e.stopPropagation();
+                    if (prevent) e.preventDefault();
+                    if (once) g.obj.removeEventListener("touch" + type, _listener[type]);
+                    if (self && e.target !== e.currentTarget) return;
+
+                    g[type](e);
+                }
+            };
+
+            _listener.start = _listen('start');
+            _listener.end = _listen('end');
+            _listener.move = _listen('move');
+
+            this.obj.addEventListener("touchstart", _listener.start, false);
+            this.obj.addEventListener("touchend", _listener.end, false);
+            this.obj.addEventListener("touchmove", _listener.move, false);
+        }
+
+        start (e) {
+
+            let g = this;
+
+            // 初始化点击状态
+            g.moved = false;
+            g.leaved = false;
+            g.longTouched = false;
+
+            g.firstTouchPosition = g.getMultiCenter(e.changedTouches);
+            g.firstTouchTime = e.timeStamp;
+            g.time = setTimeout(function () {
+                if (!g.leaved && !g.moved) {
+                    g.touchType === "longtap" && g.callBack(e, g.binding.value);
+                    g.longTouched = true;
+                }
+            }.bind(g), 1000);
+        }
+
+        end (e) {
+
+            let g = this;
+
+            let {x, y} = g.getMultiCenter(e.changedTouches);
+            let _disX = x - g.firstTouchPosition.x;
+            let _disY = y - g.firstTouchPosition.y;
+            let _dis = Math.sqrt(_disX * _disX + _disY * _disY);
+            let _timeDis = e.timeStamp - g.firstTouchTime;
+
+            clearTimeout(g.time);
+
+            let _angle = this.getAngle(_disX, _disY);
+
+            if (_dis > 18 && _timeDis < 300) {
+                g.touchType === "swipe" && g.callBack(e, g.binding.value);
+                if (_angle >= 60 && _angle <= 120)
+                    g.touchType === "swipedown" && g.callBack(e, g.binding.value);
+                if (_angle <= -60 && _angle >= -120)
+                    g.touchType === "swipeup" && g.callBack(e, g.binding.value);
+                if (_angle <= 20 && _angle >= -20)
+                    g.touchType === "swipeleft" && g.callBack(e, g.binding.value);
+                if ((_angle <= -160 && _angle > -180) || (_angle >= 160 && _angle <= 180))
+                    g.touchType === "swiperight" && g.callBack(e, g.binding.value);
+            } else {
+                if (!g.longTouched && !g.moved) {
+                    g.touchType === "tap" && g.callBack(e, g.binding.value);
+                    g.leaved = true;
+                }
+            }
+        }
+
+        move () {
+            this.moved = true;
+        }
+
+        /**
+         * 获取点击集合的中心坐标
+         * @param touches touch对象集合
+         * @return {{x: number, y: number}}
+         */
+        getMultiCenter (touches) {
+
+            let g = this, x = 0, y = 0;
+
+            const _length = touches.length;
+
+            for (let i = 0; i < _length; i++) {
+                x += touches[i].pageX;
+                y += touches[i].pageY;
+            }
+
+            return {
+                x: Math.round(x / _length),
+                y: Math.round(y / _length)
+            };
+        };
+
+        getAngle (disX, disY) {
+            let g = this;
+
+            if (typeof disX !== 'number' || typeof disY !== 'number')
+                return 45;
+
+            return Math.atan2(disY, disX) * 180 / Math.PI;
+        }
     }
-  }
-  
-  move() {
-    this.moved = true;
-  }
-  
-  /**
-   * 获取点击集合的中心坐标
-   * @param touches touch对象集合
-   * @return {{x: number, y: number}}
-   */
-  getMultiCenter(touches) {
-    
-    let g = this, x = 0, y = 0;
-    
-    const _length = touches.length;
-    
-    for (let i = 0; i < _length; i++) {
-      x += touches[i].pageX;
-      y += touches[i].pageY;
-    }
-    
-    return {
-      x: Math.round(x / _length),
-      y: Math.round(y / _length)
-    };
-  };
-  
-  getAngle(disX, disY) {
-    let g = this;
-    
-    if (typeof disX !== 'number' || typeof disY !== 'number')
-      return 45;
-    
-    return Math.atan2(disY, disX) * 180 / Math.PI;
-  }
-}
 
 
-Vue.directive("tap", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "tap");
-  }
-});
-Vue.directive("swipe", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "swipe");
-  }
-});
-Vue.directive("swipeleft", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "swipeleft");
-  }
-});
-Vue.directive("swiperight", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "swiperight");
-  }
-});
-Vue.directive("swipedown", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "swipedown");
-  }
-});
-Vue.directive("swipeup", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "swipeup");
-  }
-});
-Vue.directive("longtap", {
-  bind: function (el, binding) {
-    new VueTouch(el, binding, "longtap");
-  }
-});
-
+    Vue.directive("tap", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "tap");
+        }
+    });
+    Vue.directive("swipe", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "swipe");
+        }
+    });
+    Vue.directive("swipeleft", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "swipeleft");
+        }
+    });
+    Vue.directive("swiperight", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "swiperight");
+        }
+    });
+    Vue.directive("swipedown", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "swipedown");
+        }
+    });
+    Vue.directive("swipeup", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "swipeup");
+        }
+    });
+    Vue.directive("longtap", {
+        bind: function (el, binding) {
+            new VueTouch(el, binding, "longtap");
+        }
+    });
 
 
     /*二维数组4*4*/
@@ -401,7 +571,7 @@ Vue.directive("longtap", {
         template: `<div :class="['ysd-tzfe-score-'+score,'ysd-tzfe-score']">
            {{score}}
         </div>`,
-        data() {
+        data () {
             return {
                 isMerge: false
             }
@@ -431,13 +601,13 @@ Vue.directive("longtap", {
                 default: 0
             }
         },
-        data() {
+        data () {
             return {
                 chessData: chessData
             }
         },
         computed: {
-            chess: function() { //返回长度为16的数组 并且记录着值
+            chess: function () { //返回长度为16的数组 并且记录着值
                 var isc = new Array();
                 for (var i = 0; i < this.chessData.length; i++) {
                     for (var j = 0; j < this.chessData[i].length; j++) {
@@ -448,7 +618,8 @@ Vue.directive("longtap", {
             }
         },
         watch: {
-            chessData: function(newValue, oldValue) {},
+            chessData: function (newValue, oldValue) {
+            },
             deep: true
         },
         template: `<div>        
@@ -458,7 +629,7 @@ Vue.directive("longtap", {
            </div>
         </div>`,
         methods: {
-            getRandom() {
+            getRandom () {
                 let sjs = [2, 4];
                 let index = parseInt(2 * Math.random());
                 var fz = sjs[index];
@@ -481,10 +652,10 @@ Vue.directive("longtap", {
                     }
                 }
             },
-            getsj(x, y, score) {
+            getsj (x, y, score) {
                 this.$set(this.chessData[x], y, score)
             },
-            cshChessData() { //初始化数组
+            cshChessData () { //初始化数组
                 for (let i = 0; i < this.chessData.length; i++) {
                     for (let j = 0; j < this.chessData[i].length; j++) {
                         this.$set(this.chessData[i], [j], 0);
@@ -519,43 +690,88 @@ Vue.directive("longtap", {
         data: {
             time: (new Date()).valueOf(), //记录上一次时间戳
             frequency: 0, //记录按键几次
-            score: 0 //记录分值
+            score: 0, //记录分值,
+            baseUrl: 'http://45.76.203.138:9065',
+            //baseUrl: 'http://127.0.0.1:9065',
+            page: 1,
+            size: 10,
+            phbData: [],
+            // 是否能开始游戏
+            isGame: true
         },
-        watch:{
-            score(newValue,oldValue){
+        watch: {
+            score (newValue, oldValue) {
                 $(".animated").addClass("rubberBand")
-                 window.setTimeout(()=>{
-              $(".animated").removeClass("rubberBand")
-                 },800)
+                window.setTimeout(() => {
+                    $(".animated").removeClass("rubberBand")
+                }, 800)
             }
         },
         methods: { //方法
+            phbClose () {
+                cover.style.display = "none";   //显示遮罩层
+                modal.style.display = "none";
+            },
+            // 显示排行榜
+            phbShow () {
+                cover.style.display = "block";   //显示遮罩层
+                pswp.style.display = "block";   //显示遮罩层
+                axios({
+                    url: `/ranking/search/${this.page}/${this.size}`,
+                    method: 'get',
+                }).then(res => {
+                    let rows = res.data.data.rows
+                    this.phbData = rows
+                    pswp.style.display = "none";
+                    modal.style.display = "block";   //显示弹出层
+                })
+            },
+            topswipe (e) {
+                // 有遮罩层
+                if( cover.style.display=="block"){
+                    return
+                }
+                this.keyEvent({
+                    "keyCode": 38
+                })
+            },
+            bottomswipe (e) {
+                // 有遮罩层
+                if( cover.style.display=="block"){
+                    return
+                }
+                this.keyEvent({
+                    "keyCode": 40
+                })
+            },
 
-        	topswipe(e){
-				this.keyEvent({
-        			"keyCode":38
-        		})
-        	},
-        	bottomswipe(e){
-				this.keyEvent({
-        			"keyCode":40
-        		})
-        	},
-
-        	rightswipe(e){
-				this.keyEvent({
-        			"keyCode":37
-        		})
-        	},
-        	// 左滑动
-        	leftswipe(e){
-        		this.keyEvent({
-        			"keyCode":39
-        		})
-        	},
-            keyEvent: function(e) { //键盘事件
+            rightswipe (e) {
+                // 有遮罩层
+                if( cover.style.display=="block"){
+                    return
+                }
+                this.keyEvent({
+                    "keyCode": 37
+                })
+            },
+            // 左滑动
+            leftswipe (e) {
+                // 有遮罩层
+                if( cover.style.display=="block"){
+                    return
+                }
+                this.keyEvent({
+                    "keyCode": 39
+                })
+            },
+            //键盘事件
+            keyEvent: function (e) {
                 //e.keyCode 37 38 39 40 左上右下
                 if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40) {
+                    if (!this.isGame) {
+                        alert('请重新开始游戏')
+                        return;
+                    }
                     this.frequency++;
                     if ((new Date()).valueOf() - this.time < 300 && this.frequency != 1) {
                         return;
@@ -564,10 +780,12 @@ Vue.directive("longtap", {
                         window.sessionStorage.setItem('GameDate', JSON.stringify(this.$refs.allblock.chessData));
                         let isJudge = this.WinOrLose();
                         if (isJudge === 0) {
-                            alert("很遗憾你输了,总分数:"+this.score+"分")
+                            alert("很遗憾你输了,总分数:" + this.score + "分")
+                            this.isTop10()
                         }
                         if (isJudge === 2) {
                             alert("恭喜你 你赢了")
+                            this.isTop10()
                         }
                     }, 500)
                 }
@@ -588,7 +806,45 @@ Vue.directive("longtap", {
                 }
                 //console.log(this.$refs.allblock.chessData)
             },
-            getNewChess() { //根据ChessDate返回一个新的数组
+            isTop10 () {
+                cover.style.display = "block";   //显示遮罩层
+                pswp.style.display = "block";   //显示遮罩层
+                axios({
+                    url: '/ranking/score',
+                    method: 'get',
+                    params: {
+                        score: this.score
+                    }
+                }).then(res => {
+                    cover.style.display = "none";   //显示遮罩层
+                    pswp.style.display = "none";   //显示遮罩层
+                    // 大于前十
+                    if (res.data.flag) {
+                        var name = prompt("恭喜你,你的分数已进入前十,请输入您的名字", "")
+
+                        if (name === null) {
+                            return
+                        }
+                        cover.style.display = "block";   //显示遮罩层
+                        pswp.style.display = "block";   //显示遮罩层
+                        axios({
+                            url: '/ranking',
+                            method: 'post',
+                            data: {
+                                name,
+                                score: this.score
+                            }
+                        }).then(addRes => {
+                            cover.style.display = "none";   //显示遮罩层
+                            pswp.style.display = "none";   //显示遮罩层
+                            addRes = addRes.data;
+                            this.phbShow()
+                        })
+
+                    }
+                })
+            },
+            getNewChess () { //根据ChessDate返回一个新的数组
                 let blocks = this.$refs.allblock; // 获取子组件
                 let data = blocks.chessData;
                 let Datas = new Array();
@@ -603,7 +859,7 @@ Vue.directive("longtap", {
                 Datas = [Datas1, Datas2, Datas3, Datas4];
                 return Datas;
             },
-            moveLeft() { //左
+            moveLeft () { //左
                 let arr1 = new Array(); //第一次移动
                 let arr2 = new Array(); //移动后合并
                 let arr3 = new Array(); //合并后继续移动
@@ -617,7 +873,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[i][k];
                                     Datas[i][j] = temp;
                                     Datas[i][k] = 0;
-                                    arr1.push({ x1: i, y1: k, x2: i, y2: j });
+                                    arr1.push({x1: i, y1: k, x2: i, y2: j});
                                     break;
                                 }
                             }
@@ -629,7 +885,7 @@ Vue.directive("longtap", {
                             let temp = Datas[i][j] + Datas[i][j - 1];
                             Datas[i][j - 1] = temp;
                             Datas[i][j] = 0;
-                            arr2.push({ x1: i, y1: j, x2: i, y2: j - 1 });
+                            arr2.push({x1: i, y1: j, x2: i, y2: j - 1});
 
                         }
                     }
@@ -641,7 +897,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[i][k];
                                     Datas[i][j] = temp;
                                     Datas[i][k] = 0;
-                                    arr3.push({ x1: i, y1: k, x2: i, y2: j });
+                                    arr3.push({x1: i, y1: k, x2: i, y2: j});
                                     break;
                                 }
                             }
@@ -654,7 +910,7 @@ Vue.directive("longtap", {
                 this.time = (new Date()).valueOf();
                 this.moveLeftAnimate1(arr1, arr2, arr3)
             },
-            moveTop() { //上
+            moveTop () { //上
                 let arr1 = new Array(); //第一次移动
                 let arr2 = new Array(); //移动后合并
                 let arr3 = new Array(); //合并后继续移动
@@ -667,7 +923,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[k][i];
                                     Datas[j][i] = temp;
                                     Datas[k][i] = 0;
-                                    arr1.push({ x1: k, y1: i, x2: j, y2: i });
+                                    arr1.push({x1: k, y1: i, x2: j, y2: i});
                                     break;
                                 }
                             }
@@ -678,7 +934,7 @@ Vue.directive("longtap", {
                             let temp = Datas[j][i] + Datas[j - 1][i];
                             Datas[j - 1][i] = temp;
                             Datas[j][i] = 0;
-                            arr2.push({ x1: j, y1: i, x2: j - 1, y2: i });
+                            arr2.push({x1: j, y1: i, x2: j - 1, y2: i});
                         }
                     }
                     for (let j = 0; j < Datas[i].length; j++) { // j是第一个坐标 i是第二个
@@ -688,7 +944,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[k][i];
                                     Datas[j][i] = temp;
                                     Datas[k][i] = 0;
-                                    arr3.push({ x1: k, y1: i, x2: j, y2: i });
+                                    arr3.push({x1: k, y1: i, x2: j, y2: i});
                                     break;
                                 }
                             }
@@ -701,7 +957,7 @@ Vue.directive("longtap", {
                 this.time = (new Date()).valueOf();
                 this.moveTopAnimate1(arr1, arr2, arr3)
             },
-            moveRight() { //右
+            moveRight () { //右
                 let arr1 = new Array(); //第一次移动
                 let arr2 = new Array(); //移动后合并
                 let arr3 = new Array(); //合并后继续移动
@@ -715,7 +971,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[i][k];
                                     Datas[i][j] = temp;
                                     Datas[i][k] = 0;
-                                    arr1.push({ x1: i, y1: k, x2: i, y2: j });
+                                    arr1.push({x1: i, y1: k, x2: i, y2: j});
                                     break;
                                 }
                             }
@@ -727,7 +983,7 @@ Vue.directive("longtap", {
                             let temp = Datas[i][j] + Datas[i][j + 1];
                             Datas[i][j + 1] = temp;
                             Datas[i][j] = 0;
-                            arr2.push({ x1: i, y1: j, x2: i, y2: j + 1 });
+                            arr2.push({x1: i, y1: j, x2: i, y2: j + 1});
 
                         }
                     }
@@ -739,7 +995,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[i][k];
                                     Datas[i][j] = temp;
                                     Datas[i][k] = 0;
-                                    arr3.push({ x1: i, y1: k, x2: i, y2: j });
+                                    arr3.push({x1: i, y1: k, x2: i, y2: j});
                                     break;
                                 }
                             }
@@ -752,7 +1008,7 @@ Vue.directive("longtap", {
                 this.time = (new Date()).valueOf();
                 this.moveLeftAnimate1(arr1, arr2, arr3)
             },
-            moveBottom() { //下
+            moveBottom () { //下
                 let arr1 = new Array(); //第一次移动
                 let arr2 = new Array(); //移动后合并
                 let arr3 = new Array(); //合并后继续移动
@@ -766,7 +1022,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[k][i];
                                     Datas[j][i] = temp;
                                     Datas[k][i] = 0;
-                                    arr1.push({ x1: k, y1: i, x2: j, y2: i });
+                                    arr1.push({x1: k, y1: i, x2: j, y2: i});
                                     break;
                                 }
                             }
@@ -777,7 +1033,7 @@ Vue.directive("longtap", {
                             let temp = Datas[j][i] + Datas[j + 1][i];
                             Datas[j + 1][i] = temp;
                             Datas[j][i] = 0;
-                            arr2.push({ x1: j, y1: i, x2: j + 1, y2: i });
+                            arr2.push({x1: j, y1: i, x2: j + 1, y2: i});
                         }
                     }
                     for (let j = Datas[i].length - 1; j >= 0; j--) { // j是第一个坐标 i是第二个
@@ -787,7 +1043,7 @@ Vue.directive("longtap", {
                                     let temp = Datas[k][i];
                                     Datas[j][i] = temp;
                                     Datas[k][i] = 0;
-                                    arr3.push({ x1: k, y1: i, x2: j, y2: i });
+                                    arr3.push({x1: k, y1: i, x2: j, y2: i});
                                     break;
                                 }
                             }
@@ -801,7 +1057,7 @@ Vue.directive("longtap", {
 
                 this.moveTopAnimate1(arr1, arr2, arr3)
             },
-            moveTopAnimate1(arr, arr1, arr2) { //移动动画 上下
+            moveTopAnimate1 (arr, arr1, arr2) { //移动动画 上下
                 let blocks = this.$refs.allblock; // 获取子组件
                 let yc = 0;
                 if (arr1 == null && arr2 == null) {
@@ -843,7 +1099,7 @@ Vue.directive("longtap", {
                     }, 50)
                 }, yc)
             },
-            moveTopAnimate2(arr, arr1) { //合并动画 上下
+            moveTopAnimate2 (arr, arr1) { //合并动画 上下
                 let blocks = this.$refs.allblock; // 获取子组件
                 for (let i = 0; i < arr.length; i++) {
                     let x1 = arr[i].x1;
@@ -868,8 +1124,8 @@ Vue.directive("longtap", {
                         this.$set(blocks.chessData[x1], y1, 0);
                         Vue.nextTick(() => {
                             let $div = this.getJq(x2, y2);
-                            $div.animate({ width: "80px", height: "72px" }, 100, () => {
-                                $div.css({ width: "64px", height: "64px" })
+                            $div.animate({width: "80px", height: "72px"}, 100, () => {
+                                $div.css({width: "64px", height: "64px"})
                             })
                             $div.removeClass("tran");
                             $div.css("margin-top", "0");
@@ -878,7 +1134,7 @@ Vue.directive("longtap", {
                     this.moveTopAnimate1(arr1, null, null)
                 }, 60)
             },
-            moveLeftAnimate1(arr, arr1, arr2) { //移动动画 左右    
+            moveLeftAnimate1 (arr, arr1, arr2) { //移动动画 左右
                 let blocks = this.$refs.allblock; // 获取子组件
                 let yc = 0;
                 if (arr1 == null && arr2 == null) {
@@ -921,7 +1177,7 @@ Vue.directive("longtap", {
                     }, 50)
                 }, yc)
             },
-            moveLeftAnimate2(arr, arr1) { //合并动画 左右
+            moveLeftAnimate2 (arr, arr1) { //合并动画 左右
                 let blocks = this.$refs.allblock; // 获取子组件
                 for (let i = 0; i < arr.length; i++) {
                     let x1 = arr[i].x1;
@@ -946,8 +1202,8 @@ Vue.directive("longtap", {
                         this.$set(blocks.chessData[x1], y1, 0);
                         Vue.nextTick(() => {
                             let $div = this.getJq(x2, y2);
-                            $div.animate({ width: "80px", height: "72px" }, 100, () => {
-                                $div.css({ width: "64px", height: "64px" })
+                            $div.animate({width: "80px", height: "72px"}, 100, () => {
+                                $div.css({width: "64px", height: "64px"})
                             })
                             $div.removeClass("tran");
                             $div.css("margin-left", "0");
@@ -956,11 +1212,11 @@ Vue.directive("longtap", {
                     this.moveLeftAnimate1(arr1, null, null)
                 }, 110)
             },
-            getJq(x, y) { //获取指定的div
+            getJq (x, y) { //获取指定的div
                 let num = (x) * 4 + y + 1 // 在16位数组的下标
                 return $(".ysd-tzfe-block .ysd-tzfe-blocks-" + num + " div");
             },
-            clicknewGame() { //点击初始化
+            clicknewGame () { //点击初始化
                 let blocks = this.$refs.allblock;
                 blocks.cshChessData();
                 blocks.getRandom();
@@ -968,8 +1224,10 @@ Vue.directive("longtap", {
                 this.score = 0;
                 window.sessionStorage.setItem("GameDate", JSON.stringify(blocks.chessData));
                 window.sessionStorage.removeItem("score");
+                this.isGame = true
+                window.sessionStorage.setItem("isGame", 'true')
             },
-            WinOrLose() { //判断输赢 0输1未分出胜负2赢
+            WinOrLose () { //判断输赢 0输1未分出胜负2赢
                 let Datas = this.getNewChess();
                 let isJudge = 0;
                 let isj = 0;
@@ -997,6 +1255,8 @@ Vue.directive("longtap", {
                     for (let j = 0; j < Datas[i].length; j++) {
                         if (Datas[i][j] === 2048) {
                             isJudge = 2;
+                            this.isGame = false
+                            window.sessionStorage.setItem("isGame", 'false')
                             return isJudge;
                         }
                         if (Datas[i][j] === 0) {
@@ -1007,10 +1267,14 @@ Vue.directive("longtap", {
                 if (isj === 1) {
                     return isj;
                 }
+                if (isJudge === 0) {
+                    this.isGame = false
+                    window.sessionStorage.setItem("isGame", 'false')
+                }
                 return isJudge;
             }
         },
-        mounted: function() { //钩子
+        mounted: function () { //钩子
             if (f == null) {
                 let xy1 = this.$refs.allblock.getRandom();
                 let xy2 = this.$refs.allblock.getRandom();
@@ -1024,8 +1288,16 @@ Vue.directive("longtap", {
             window.onkeydown = (e) => {
                 vm.keyEvent(e)
             }
+            let isGame = window.sessionStorage.getItem("isGame")
+            if (isGame != null && isGame != '') {
+                this.isGame = eval(isGame)
+            }
+            axios = axios.create({
+                baseURL: this.baseUrl,
+            });
+
         }
     });
-    </script>
+</script>
 </body>
 </html>
